@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gerador Code 128 em Lote</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, Arial; margin: 16px; background: #0b0b0b; color: #eaeaea; }
+    .wrap { max-width: 1100px; margin: 0 auto; }
+    h1 { font-size: 20px; margin: 0 0 12px; }
+
+    /* gap maior empurra o painel sem “vazar” */
+    .row { display: grid; grid-template-columns: 1fr 360px; gap: 28px; align-items: start; }
+
+    textarea { width: 100%; height: 220px; padding: 10px; border-radius: 10px; border: 1px solid #333; background:#121212; color:#eaeaea; }
+
+    /* removi margin-left pra não estourar pra fora */
+    .panel { border: 1px solid #333; border-radius: 12px; padding: 12px; background: #111; width: 100%; }
+
+    label { display:block; font-size: 12px; color:#bdbdbd; margin-top: 8px; }
+    input { width: 100%; padding: 8px; border-radius: 10px; border:1px solid #333; background:#121212; color:#eaeaea; }
+    button { width: 100%; padding: 10px; border-radius: 12px; border:0; cursor:pointer; margin-top: 10px; font-weight: 700; }
+    button.primary { background: #2b7cff; color: white; }
+    button.secondary { background: #2a2a2a; color: #eaeaea; border:1px solid #333; }
+
+    .progress { height: 10px; border-radius: 999px; background: #222; overflow:hidden; margin-top: 10px; }
+    .bar { height: 100%; width: 0%; background: #2b7cff; transition: width .15s linear; }
+    .status { font-size: 12px; color:#cfcfcf; margin-top: 6px; }
+
+    .viewerWrap { margin-top: 14px; }
+    .viewerHeader { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom: 10px; }
+    .counter { font-size: 12px; color:#bdbdbd; }
+    .navRow { display:flex; gap:10px; align-items:center; }
+
+    .navBtn { width: auto; padding: 10px 14px; border-radius: 12px; border: 1px solid #333; background:#111; color:#eaeaea; cursor: pointer; font-weight: 800; }
+    .navBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .goto { width: 110px; padding: 10px 10px; border-radius: 12px; border: 1px solid #333; background:#111; color:#eaeaea; font-weight: 700; text-align: center; }
+
+    .viewerCard { border: 1px solid #333; border-radius: 12px; background: #111; padding: 14px; }
+    .paper { background: #ffffff; border-radius: 12px; padding: 28px; display:flex; align-items:center; justify-content:center; min-height: 340px; }
+    canvas { background: #ffffff; border-radius: 10px; display:block; width: auto; height: auto; max-width: 720px; max-height: 260px; }
+    .codeText { margin-top: 10px; font-size: 12px; color: #bdbdbd; text-align: center; word-break: break-all; }
+    .hint { font-size: 12px; color:#bdbdbd; margin-top: 8px; }
+
+    /* Em telas menores, vira 1 coluna pra não estourar */
+    @media (max-width: 980px) {
+      .row { grid-template-columns: 1fr; gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Gerador Code 128 em lote</h1>
+
+    <div class="row">
+      <div>
+        <textarea id="codes" placeholder="Cole aqui... (um por linha)
+Ex:
+888001299767384
+888001299767385
+888001299767386"></textarea>
+
+        <div class="progress"><div class="bar" id="bar"></div></div>
+        <div class="status" id="status">Pronto.</div>
+
+        <div class="viewerWrap">
+          <div class="viewerHeader">
+            <div class="counter" id="counter">0/0</div>
+
+            <div class="navRow">
+              <button class="navBtn" id="prevBtn" disabled>◀</button>
+              <button class="navBtn" id="nextBtn" disabled>▶</button>
+              <input class="goto" id="goto" type="number" min="1" placeholder="Ir para" />
+            </div>
+          </div>
+
+          <div class="viewerCard">
+            <div class="paper">
+              <canvas id="canvas"></canvas>
+            </div>
+            <div class="codeText" id="codeText">—</div>
+            <div class="hint">Dica: use as setas do teclado (← →) ou digite o número no “Ir para” e aperte Enter.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <strong>Configurações</strong>
+
+        <label>Scale (grossura/tamanho)</label>
+        <input id="scale" type="number" value="4" min="1" max="10"/>
+
+        <label>Height (altura das barras — mm)</label>
+        <input id="height" type="number" value="15" min="5" max="40"/>
+
+        <label>Text size (tamanho do número)</label>
+        <input id="textsize" type="number" value="12" min="6" max="30"/>
+
+        <label>Padding (margem branca — px)</label>
+        <input id="padding" type="number" value="10" min="0" max="60"/>
+
+        <label>Limite máximo de códigos (até 10.000)</label>
+        <input id="limit" type="number" value="10000" min="1" max="10000"/>
+
+        <button class="primary" id="btnLoad">Carregar lista</button>
+        <button class="secondary" id="btnRender">Regerar código atual</button>
+        <button class="secondary" id="btnClear">Limpar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/4.7.0/bwip-js-min.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    let lista = [];
+    let idx = 0;
+
+    function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+
+    function setProgress(done, total) {
+      const pct = total ? Math.round((done / total) * 100) : 0;
+      $("bar").style.width = pct + "%";
+      $("status").textContent = total ? `Carregado: ${done}/${total} (${pct}%)` : "Pronto.";
+    }
+
+    function parseCodes(text, limit) {
+      const lines = text.split(/\r?\n/);
+      const out = [];
+      for (let i = 0; i < lines.length; i++) {
+        const s = lines[i].trim();
+        if (!s) continue;
+        out.push(s);
+        if (out.length >= limit) break;
+      }
+      return out;
+    }
+
+    function updateUI() {
+      const total = lista.length;
+      $("counter").textContent = total ? `${idx + 1}/${total}` : "0/0";
+      $("prevBtn").disabled = total <= 1 || idx <= 0;
+      $("nextBtn").disabled = total <= 1 || idx >= total - 1;
+      $("goto").max = total || 1;
+      $("goto").value = "";
+    }
+
+    function renderAtual() {
+      const total = lista.length;
+      if (!total) {
+        $("codeText").textContent = "—";
+        const c = $("canvas");
+        const ctx = c.getContext("2d");
+        ctx.clearRect(0, 0, c.width, c.height);
+        return;
+      }
+
+      const code = lista[idx];
+
+      const scale = parseInt($("scale").value, 10);
+      const height = parseInt($("height").value, 10);
+      const textsize = parseInt($("textsize").value, 10);
+      const padding = parseInt($("padding").value, 10);
+
+      const canvas = $("canvas");
+
+      try {
+        bwipjs.toCanvas(canvas, {
+          bcid: "code128",
+          text: code,
+          scale: scale,
+          height: height,
+          includetext: true,
+          textxalign: "center",
+          textsize: textsize,
+          paddingwidth: padding,
+          paddingheight: padding,
+          backgroundcolor: "ffffff"
+        });
+        $("codeText").textContent = code;
+        $("status").textContent = `Pronto. (Código ${idx + 1} de ${total})`;
+      } catch (e) {
+        $("codeText").textContent = `${code}  (ERRO: ${e.message || e})`;
+        $("status").textContent = "Erro ao gerar este código.";
+      }
+    }
+
+    function carregarLista() {
+      const limit = clamp(parseInt($("limit").value, 10) || 10000, 1, 10000);
+      const codes = parseCodes($("codes").value, limit);
+      lista = codes;
+      idx = 0;
+
+      setProgress(codes.length, codes.length);
+      $("status").textContent = codes.length ? `Lista carregada: ${codes.length} códigos.` : "Cole pelo menos 1 código (1 por linha).";
+
+      updateUI();
+      renderAtual();
+    }
+
+    $("btnLoad").addEventListener("click", carregarLista);
+    $("btnRender").addEventListener("click", () => renderAtual());
+
+    $("btnClear").addEventListener("click", () => {
+      $("codes").value = "";
+      lista = [];
+      idx = 0;
+      setProgress(0, 0);
+      $("status").textContent = "Pronto.";
+      updateUI();
+      renderAtual();
+    });
+
+    $("prevBtn").addEventListener("click", () => {
+      if (!lista.length) return;
+      idx = clamp(idx - 1, 0, lista.length - 1);
+      updateUI();
+      renderAtual();
+    });
+
+    $("nextBtn").addEventListener("click", () => {
+      if (!lista.length) return;
+      idx = clamp(idx + 1, 0, lista.length - 1);
+      updateUI();
+      renderAtual();
+    });
+
+    $("goto").addEventListener("keydown", (ev) => {
+      if (ev.key !== "Enter") return;
+      if (!lista.length) return;
+      const v = parseInt($("goto").value, 10);
+      if (!v) return;
+      idx = clamp(v - 1, 0, lista.length - 1);
+      updateUI();
+      renderAtual();
+    });
+
+    window.addEventListener("keydown", (ev) => {
+      if (!lista.length) return;
+      const t = ev.target;
+      const tag = (t && t.tagName) ? t.tagName.toLowerCase() : "";
+      if (tag === "textarea" || tag === "input") return;
+
+      if (ev.key === "ArrowLeft") {
+        idx = clamp(idx - 1, 0, lista.length - 1);
+        updateUI();
+        renderAtual();
+      } else if (ev.key === "ArrowRight") {
+        idx = clamp(idx + 1, 0, lista.length - 1);
+        updateUI();
+        renderAtual();
+      }
+    });
+
+    updateUI();
+  </script>
+</body>
+</html>
