@@ -1,11 +1,13 @@
 <!doctype html>
 <html lang="pt-br">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Gerador Code 128 em Lote</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
+
 <body>
   <div class="wrap">
     <h1>Gerador Code 128 em lote</h1>
@@ -18,7 +20,9 @@ Ex:
 888001299767385
 888001299767386"></textarea>
 
-        <div class="progress"><div class="bar" id="bar"></div></div>
+        <div class="progress">
+          <div class="bar" id="bar"></div>
+        </div>
         <div class="status" id="status">Pronto.</div>
 
         <div class="viewerWrap">
@@ -46,19 +50,19 @@ Ex:
         <strong>Configurações</strong>
 
         <label>Scale (grossura/tamanho)</label>
-        <input id="scale" type="number" value="4" min="1" max="10"/>
+        <input id="scale" type="number" value="4" min="1" max="10" />
 
         <label>Height (altura das barras — mm)</label>
-        <input id="height" type="number" value="15" min="5" max="40"/>
+        <input id="height" type="number" value="15" min="5" max="40" />
 
         <label>Text size (tamanho do número)</label>
-        <input id="textsize" type="number" value="12" min="6" max="30"/>
+        <input id="textsize" type="number" value="12" min="6" max="30" />
 
         <label>Padding (margem branca — px)</label>
-        <input id="padding" type="number" value="10" min="0" max="60"/>
+        <input id="padding" type="number" value="10" min="0" max="60" />
 
         <label>Limite máximo de códigos (até 10.000)</label>
-        <input id="limit" type="number" value="10000" min="1" max="10000"/>
+        <input id="limit" type="number" value="10000" min="1" max="10000" />
 
         <button class="primary" id="btnLoad">Carregar lista</button>
         <button class="secondary" id="btnRender">Regerar código atual</button>
@@ -70,4 +74,5 @@ Ex:
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/4.7.0/bwip-js-min.js"></script>
   <script src="./app.js"></script>
 </body>
+
 </html>

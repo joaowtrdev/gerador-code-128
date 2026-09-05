@@ -1,43 +1,260 @@
-*{box-sizing:border-box}
-body{font-family:system-ui,Arial;margin:16px;background:#0b0b0b;color:#eaeaea}
-.wrap{max-width:1100px;margin:0 auto}
-h1{font-size:20px;margin:0 0 12px}
-.row{display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
-textarea{width:100%;height:220px;padding:10px;border-radius:10px;border:1px solid #333;background:#121212;color:#eaeaea}
-.panel{border:1px solid #333;border-radius:12px;padding:12px;background:#111;width:100%}
-label{display:block;font-size:12px;color:#bdbdbd;margin-top:8px}
-input{width:100%;padding:8px;border-radius:10px;border:1px solid #333;background:#121212;color:#eaeaea}
-button{width:100%;padding:10px;border-radius:12px;border:0;cursor:pointer;margin-top:10px;font-weight:700}
-button.primary{background:#2b7cff;color:#fff}
-button.secondary{background:#2a2a2a;color:#eaeaea;border:1px solid #333}
-.progress{height:10px;border-radius:999px;background:#222;overflow:hidden;margin-top:10px}
-.bar{height:100%;width:0%;background:#2b7cff;transition:width .15s linear}
-.status{font-size:12px;color:#cfcfcf;margin-top:6px}
-.viewerWrap{margin-top:14px}
-.viewerHeader{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
-.counter{font-size:12px;color:#bdbdbd}
-.navRow{display:flex;gap:10px;align-items:center}
-.navBtn{width:auto;padding:10px 14px;border-radius:12px;border:1px solid #333;background:#111;color:#eaeaea;cursor:pointer;font-weight:800}
-.navBtn:disabled{opacity:.45;cursor:not-allowed}
-.goto{width:110px;padding:10px 10px;border-radius:12px;border:1px solid #333;background:#111;color:#eaeaea;font-weight:700;text-align:center}
-.viewerCard{border:1px solid #333;border-radius:12px;background:#111;padding:14px}
-.paper{background:#fff;border-radius:12px;padding:28px;display:flex;align-items:center;justify-content:center;min-height:340px}
-canvas{background:#fff;border-radius:10px;display:block;width:auto;height:auto;max-width:720px;max-height:260px}
-.codeText{margin-top:10px;font-size:12px;color:#bdbdbd;text-align:center;word-break:break-all}
-.hint{font-size:12px;color:#bdbdbd;margin-top:8px}
-@media (max-width:700px){
-  body{margin:10px}
-  .wrap{max-width:100%}
-  .row{grid-template-columns:1fr;gap:14px}
-  textarea{height:170px;font-size:16px}
-  input{font-size:16px}
-  .viewerHeader{flex-wrap:wrap;gap:10px}
-  .navRow{width:100%;justify-content:flex-end}
-  .goto{width:120px}
-  .viewerCard{padding:12px}
-  .paper{padding:14px;min-height:220px}
-  canvas{max-width:100%;max-height:200px}
-  .hint{font-size:11px;line-height:1.3}
-  .panel{position:static;width:100%}
-  .progress{display:none}
+* {
+  box-sizing: border-box
+}
+
+body {
+  font-family: system-ui, Arial;
+  margin: 16px;
+  background: #0b0b0b;
+  color: #eaeaea
+}
+
+.wrap {
+  max-width: 1100px;
+  margin: 0 auto
+}
+
+h1 {
+  font-size: 20px;
+  margin: 0 0 12px
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 28px;
+  align-items: start
+}
+
+textarea {
+  width: 100%;
+  height: 220px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #333;
+  background: #121212;
+  color: #eaeaea
+}
+
+.panel {
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 12px;
+  background: #111;
+  width: 100%
+}
+
+label {
+  display: block;
+  font-size: 12px;
+  color: #bdbdbd;
+  margin-top: 8px
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid #333;
+  background: #121212;
+  color: #eaeaea
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  border-radius: 12px;
+  border: 0;
+  cursor: pointer;
+  margin-top: 10px;
+  font-weight: 700
+}
+
+button.primary {
+  background: #2b7cff;
+  color: #fff
+}
+
+button.secondary {
+  background: #2a2a2a;
+  color: #eaeaea;
+  border: 1px solid #333
+}
+
+.progress {
+  height: 10px;
+  border-radius: 999px;
+  background: #222;
+  overflow: hidden;
+  margin-top: 10px
+}
+
+.bar {
+  height: 100%;
+  width: 0%;
+  background: #2b7cff;
+  transition: width .15s linear
+}
+
+.status {
+  font-size: 12px;
+  color: #cfcfcf;
+  margin-top: 6px
+}
+
+.viewerWrap {
+  margin-top: 14px
+}
+
+.viewerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px
+}
+
+.counter {
+  font-size: 12px;
+  color: #bdbdbd
+}
+
+.navRow {
+  display: flex;
+  gap: 10px;
+  align-items: center
+}
+
+.navBtn {
+  width: auto;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #333;
+  background: #111;
+  color: #eaeaea;
+  cursor: pointer;
+  font-weight: 800
+}
+
+.navBtn:disabled {
+  opacity: .45;
+  cursor: not-allowed
+}
+
+.goto {
+  width: 110px;
+  padding: 10px 10px;
+  border-radius: 12px;
+  border: 1px solid #333;
+  background: #111;
+  color: #eaeaea;
+  font-weight: 700;
+  text-align: center
+}
+
+.viewerCard {
+  border: 1px solid #333;
+  border-radius: 12px;
+  background: #111;
+  padding: 14px
+}
+
+.paper {
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 340px
+}
+
+canvas {
+  background: #fff;
+  border-radius: 10px;
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 720px;
+  max-height: 260px
+}
+
+.codeText {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #bdbdbd;
+  text-align: center;
+  word-break: break-all
+}
+
+.hint {
+  font-size: 12px;
+  color: #bdbdbd;
+  margin-top: 8px
+}
+
+@media (max-width:700px) {
+  body {
+    margin: 10px
+  }
+
+  .wrap {
+    max-width: 100%
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+    gap: 14px
+  }
+
+  textarea {
+    height: 170px;
+    font-size: 16px
+  }
+
+  input {
+    font-size: 16px
+  }
+
+  .viewerHeader {
+    flex-wrap: wrap;
+    gap: 10px
+  }
+
+  .navRow {
+    width: 100%;
+    justify-content: flex-end
+  }
+
+  .goto {
+    width: 120px
+  }
+
+  .viewerCard {
+    padding: 12px
+  }
+
+  .paper {
+    padding: 14px;
+    min-height: 220px
+  }
+
+  canvas {
+    max-width: 100%;
+    max-height: 200px
+  }
+
+  .hint {
+    font-size: 11px;
+    line-height: 1.3
+  }
+
+  .panel {
+    position: static;
+    width: 100%
+  }
+
+  .progress {
+    display: none
+  }
 }
